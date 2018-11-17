@@ -33,12 +33,11 @@ impl Bridges {
         }
     }
     pub fn new(assignment_number: i32, user_name: &str, api_key: &str) -> Bridges {
-        Bridges {
+        Bridges::new_with_strings(
             assignment_number,
-            user_name: String::from(user_name),
-            api_key: String::from(api_key),
-            server: Server::Live,
-        }
+            String::from(user_name),
+            String::from(api_key),
+        )
     }
     pub fn set_server(&mut self, server: Server) {
         self.server = server;
@@ -59,6 +58,10 @@ struct Array {
     nodes: Vec<i8>,
 }
 
+/*
+ *  This function takes two deserialized JSON Values and adds the second Value's fields to the
+ *  first's
+ */
 use serde_json::Value;
 fn merge(a: &mut Value, b: Value) {
     match (a, b) {
