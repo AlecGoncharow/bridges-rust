@@ -133,6 +133,14 @@ impl Bridges {
         };
 
         merge(&mut json, self.data_structure.clone());
+        match json {
+            serde_json::Value::Null => panic!(
+                "There was a problem adding the data_structure to the JSON, data_structure: {:?}",
+                self.data_structure
+            ),
+            _ => (),
+        }
+
         let client = reqwest::Client::new();
         let resp = match client.post(uri.as_str()).json(&json).send() {
             Ok(resp) => resp,
