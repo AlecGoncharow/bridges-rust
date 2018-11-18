@@ -32,7 +32,7 @@ pub enum DataStructure {
 }
 
 impl Bridges {
-    pub fn new_with_strings(assignment_number: i32, user_name: String, api_key: String) -> Bridges {
+    pub fn new_from_strings(assignment_number: i32, user_name: String, api_key: String) -> Bridges {
         Bridges {
             assignment_number,
             user_name,
@@ -48,7 +48,7 @@ impl Bridges {
         }
     }
     pub fn new(assignment_number: i32, user_name: &str, api_key: &str) -> Bridges {
-        Bridges::new_with_strings(
+        Bridges::new_from_strings(
             assignment_number,
             String::from(user_name),
             String::from(api_key),
