@@ -19,19 +19,19 @@ pub struct Bridges {
     subassignment_index: u32,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct GeneralFields {
+    title: String,
+    map_overlay: bool,
+    coord_system_type: String,
+}
+
 #[derive(Clone, Debug)]
 pub enum Server {
     Live,
     Clone,
     Local,
     None,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct GeneralFields {
-    title: String,
-    map_overlay: bool,
-    coord_system_type: String,
 }
 
 impl Bridges {
@@ -88,7 +88,7 @@ impl Bridges {
         self.general_fields.map_overlay = map_overlay;
     }
 
-    pub fn set_data_structure(&mut self, data_structure: impl serde::ser::Serialize) {
+    pub fn update_data_structure(&mut self, data_structure: impl serde::ser::Serialize) {
         let json: serde_json::Value = match serde_json::to_value(&data_structure) {
             Ok(s) => s,
             Err(error) => panic!(
@@ -110,11 +110,19 @@ impl Bridges {
         };
 
         let mut uri = String::from(url);
+        let subassignment_index_leading_zero = match self.subassignment_index {
+            0..=9 => "0",
+            _ => "",
+        };
 
         write!(
             &mut uri,
-            "/assignments/{}.{}?apikey={}&username={}",
-            self.assignment_number, self.subassignment_index, self.api_key, self.user_name
+            "/assignments/{}.{}{}?apikey={}&username={}",
+            self.assignment_number,
+            subassignment_index_leading_zero,
+            self.subassignment_index,
+            self.api_key,
+            self.user_name
         );
 
         println!("{}", uri);
@@ -130,6 +138,9 @@ impl Bridges {
             Ok(resp) => resp,
             Err(error) => panic!("There was a problem sending the request: {}", error),
         };
+
+        println!("{:?}", json);
+        self.subassignment_index += 1;
 
         use reqwest::StatusCode;
         match resp.status() {
@@ -173,7 +184,6 @@ mod tests {
     fn test_vis_post() {
         use super::*;
         use std::env;
-        use std::fmt::Write;
 
         let user_name = match env::var("BRIDGES_USER_NAME") {
             Ok(var) => var,
@@ -188,7 +198,5 @@ mod tests {
         let my_array = array::Array::<i32>::new();
         my_bridges.set_data_structure(&my_array);
         my_bridges.visualize();
-
-        use reqwest::StatusCode;
     }
 }
