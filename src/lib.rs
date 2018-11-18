@@ -10,63 +10,139 @@ pub mod data_source;
 
 #[derive(Debug)]
 pub struct Bridges {
-    pub assignment_number: i32,
+    pub assignment_number: u32,
     pub user_name: String,
     pub api_key: String,
     server: Server,
     general_fields: GeneralFields,
-    data_structure: DataStructure,
+    data_structure: serde_json::Value,
+    subassignment_index: u32,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Server {
     Live,
     Clone,
     Local,
-}
-
-#[derive(Debug)]
-pub enum DataStructure {
-    Array,
     None,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct GeneralFields {
+    title: String,
+    map_overlay: bool,
+    coord_system_type: String,
+}
+
 impl Bridges {
-    pub fn new_from_strings(assignment_number: i32, user_name: String, api_key: String) -> Bridges {
-        Bridges {
-            assignment_number,
-            user_name,
-            api_key,
-            server: Server::Live,
-            general_fields: GeneralFields {
-                visual: String::from(""),
-                title: String::from(""),
-                map_overlay: false,
-                coord_system_type: String::from(""),
-            },
-            data_structure: DataStructure::None,
-        }
-    }
-    pub fn new(assignment_number: i32, user_name: &str, api_key: &str) -> Bridges {
+    pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Bridges {
         Bridges::new_from_strings(
             assignment_number,
             String::from(user_name),
             String::from(api_key),
         )
     }
+
+    pub fn new_from_strings(assignment_number: u32, user_name: String, api_key: String) -> Bridges {
+        Bridges {
+            assignment_number,
+            user_name,
+            api_key,
+            server: Server::Live,
+            general_fields: GeneralFields {
+                title: String::from(""),
+                map_overlay: false,
+                coord_system_type: String::from(""),
+            },
+            data_structure: serde_json::Value::default(),
+            subassignment_index: 0,
+        }
+    }
+
     pub fn set_server(&mut self, server: Server) {
         self.server = server;
     }
 
-    pub fn visualize(&self) {}
-}
+    pub fn set_server_from_str(&mut self, server: &str) -> Result<Server, &'static str> {
+        let server: Server = match server {
+            "live" => Server::Live,
+            "clone" => Server::Clone,
+            "local" => Server::Local,
+            _ => Server::None,
+        };
 
-#[derive(Serialize, Deserialize, Debug)]
-struct GeneralFields {
-    visual: String,
-    title: String,
-    map_overlay: bool,
-    coord_system_type: String,
+        match server {
+            Server::None => Err("Invalid server use: live, clone, or local"),
+            _ => {
+                self.set_server(server.clone());
+                Ok(server)
+            }
+        }
+    }
+
+    pub fn set_title(&mut self, title: String) {
+        self.general_fields.title = title;
+    }
+
+    pub fn set_map_overlay(&mut self, map_overlay: bool) {
+        self.general_fields.map_overlay = map_overlay;
+    }
+
+    pub fn set_data_structure(&mut self, data_structure: impl serde::ser::Serialize) {
+        let json: serde_json::Value = match serde_json::to_value(&data_structure) {
+            Ok(s) => s,
+            Err(error) => panic!(
+                "There was a problem serialzing Bridges data_structure: {}",
+                error
+            ),
+        };
+        self.data_structure = json;
+    }
+
+    pub fn visualize(&mut self) {
+        use std::fmt::Write;
+
+        let url = match self.server {
+            Server::Live => "http://bridges-cs.herokuapp.com",
+            Server::Clone => "http://bridges-clone.herokuapp.com",
+            Server::Local => "http://127.0.0.1:3000",
+            Server::None => "",
+        };
+
+        let mut uri = String::from(url);
+
+        write!(
+            &mut uri,
+            "/assignments/{}.{}?apikey={}&username={}",
+            self.assignment_number, self.subassignment_index, self.api_key, self.user_name
+        );
+
+        println!("{}", uri);
+
+        let mut json: serde_json::Value = match serde_json::to_value(&self.general_fields) {
+            Ok(s) => s,
+            Err(error) => panic!("There was a problem serialzing Bridges fields: {}", error),
+        };
+
+        merge(&mut json, self.data_structure.clone());
+        let client = reqwest::Client::new();
+        let resp = match client.post(uri.as_str()).json(&json).send() {
+            Ok(resp) => resp,
+            Err(error) => panic!("There was a problem sending the request: {}", error),
+        };
+
+        use reqwest::StatusCode;
+        match resp.status() {
+            StatusCode::OK => println!(
+                "\nCheck Your Visualization at the following link:\n\n{}/assignments/{}/{}\n\n",
+                url, self.assignment_number, self.user_name
+            ),
+            _ => println!(
+                "There was a problem sending the visualization representation to the server. StatusCode:{} \n",
+                resp.status()
+            ),
+        };
+    }
 }
 
 /*
@@ -99,18 +175,6 @@ mod tests {
         use std::env;
         use std::fmt::Write;
 
-        let ds = GeneralFields {
-            visual: String::from("Array"),
-            title: String::from("bridges-rust test case"),
-            map_overlay: false,
-            coord_system_type: String::from("cartesian"),
-        };
-
-        let dims = Array {
-            dims: vec![0, 0, 0],
-            nodes: vec![],
-        };
-
         let user_name = match env::var("BRIDGES_USER_NAME") {
             Ok(var) => var,
             Err(error) => panic!("There was a problem reading BRIDGES_USER_NAME: {:?}", error),
@@ -120,36 +184,11 @@ mod tests {
             Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
         };
 
-        let assignment = "1.0";
-        let mut uri = String::from("http://bridges-clone.herokuapp.com/assignments/");
-        write!(
-            &mut uri,
-            "{}?apikey={}&username={}",
-            assignment, api_key, user_name
-        );
-
-        let mut json_ds: serde_json::Value = match serde_json::to_value(&ds) {
-            Ok(s) => s,
-            Err(error) => panic!("There was a problem serialzing data structure: {}", error),
-        };
-        let json_arr: serde_json::Value = match serde_json::to_value(&dims) {
-            Ok(s) => s,
-            Err(error) => panic!("There was a problem serialzing data structure: {}", error),
-        };
-        println!("{:?}", json_ds);
-        merge(&mut json_ds, json_arr);
-        println!("{:?}", json_ds);
-
-        let client = reqwest::Client::new();
-        let resp = client.post(uri.as_str()).json(&json_ds).send();
-        let resp: reqwest::Response = match resp {
-            Ok(resp) => resp,
-            Err(error) => panic!("There was a problem sending the request: {}", error),
-        };
+        let mut my_bridges = Bridges::new_from_strings(1, user_name, api_key);
+        let my_array = array::Array::<i32>::new();
+        my_bridges.set_data_structure(&my_array);
+        my_bridges.visualize();
 
         use reqwest::StatusCode;
-        assert_eq!(resp.status(), StatusCode::OK);
-
-        println!("{:?}", resp);
     }
 }
