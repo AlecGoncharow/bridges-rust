@@ -204,7 +204,7 @@ mod tests {
 
         let mut my_bridges = Bridges::new_from_strings(1, user_name, api_key);
         let my_array = array::Array::<i32>::new();
-        my_bridges.set_data_structure(&my_array);
+        my_bridges.update_data_structure(&my_array);
         my_bridges.visualize();
     }
 }
