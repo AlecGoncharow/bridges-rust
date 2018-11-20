@@ -1,11 +1,13 @@
+use super::element::Element;
+
 #[derive(Serialize, Deserialize)]
 pub struct Array<T> {
     visual: String,
-    dims: Vec<i8>,
-    nodes: Vec<T>,
+    pub dims: Vec<i8>,
+    pub nodes: Vec<Element<T>>,
 }
 
-impl<T> Array<T> {
+impl<T: Default> Array<T> {
     pub fn new() -> Array<T> {
         Array {
             visual: String::from("Array"),

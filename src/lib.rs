@@ -7,6 +7,7 @@ extern crate serde_json;
 
 pub mod array;
 pub mod data_source;
+pub mod element;
 
 #[derive(Debug)]
 pub struct Bridges {
@@ -203,7 +204,16 @@ mod tests {
         };
 
         let mut my_bridges = Bridges::new_from_strings(1, user_name, api_key);
-        let my_array = array::Array::<i32>::new();
+        let mut my_array = array::Array::<i32>::new();
+        my_array.dims = vec![5, 0, 0];
+        for item in 0..5 {
+            let mut my_element = element::Element::<i32>::new();
+            my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
+            my_element.value = item.clone();
+            my_element.name = item.to_string();
+            my_array.nodes.push(my_element);
+        }
+        my_bridges.set_server(Server::Clone);
         my_bridges.update_data_structure(&my_array);
         my_bridges.visualize();
     }
