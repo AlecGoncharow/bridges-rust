@@ -164,6 +164,18 @@ impl Bridges {
     }
 }
 
+// exposes struct functions for ease of access
+pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Bridges {
+    Bridges::new_from_strings(
+        assignment_number,
+        String::from(user_name),
+        String::from(api_key),
+    )
+}
+pub fn new_from_strings(assignment_number: u32, user_name: String, api_key: String) -> Bridges {
+    Bridges::new_from_strings(assignment_number, user_name, api_key)
+}
+
 /*
  *  This function takes two deserialized JSON Values and adds the second Value's fields to the
  *  first's
@@ -202,11 +214,11 @@ mod tests {
             Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
         };
 
-        let mut my_bridges = Bridges::new_from_strings(1, user_name, api_key);
-        let mut my_array = array::Array::<i32>::new();
+        let mut my_bridges = new_from_strings(1, user_name, api_key);
+        let mut my_array = array::new::<i32>();
         my_array.dims = vec![5, 0, 0];
         for item in 0..5 {
-            let mut my_element = element::Element::<i32>::new();
+            let mut my_element = element::new::<i32>();
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
             my_element.value = item.clone();
             my_element.name = item.to_string();
