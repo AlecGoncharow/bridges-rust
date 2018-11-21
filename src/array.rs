@@ -16,3 +16,7 @@ impl<T: Default> Array<T> {
         }
     }
 }
+
+pub fn new<T: Default>() -> Array<T> {
+    Array::<T>::new()
+}

@@ -20,3 +20,7 @@ impl<T: Default> Element<T> {
         }
     }
 }
+
+pub fn new<T: Default>() -> Element<T> {
+    Element::<T>::new()
+}
