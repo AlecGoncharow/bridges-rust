@@ -35,6 +35,12 @@ pub enum Server {
 }
 
 impl Bridges {
+    /// Constructor for Bridges struct
+    /// # Example
+    /// ```
+    /// let mut my_bridges = Bridges::new(1, "user_name", "api_key");
+    ///
+    /// ```
     pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Bridges {
         Bridges::new_from_strings(
             assignment_number,
@@ -43,6 +49,7 @@ impl Bridges {
         )
     }
 
+    /// Same as other construct except with `String`s in place of `str`
     pub fn new_from_strings(assignment_number: u32, user_name: String, api_key: String) -> Bridges {
         Bridges {
             assignment_number,
@@ -63,6 +70,7 @@ impl Bridges {
         self.server = server;
     }
 
+    /// Sets server with str instead of using Server enum, options: `"live"`, `"clone"`, `"local"`
     pub fn set_server_from_str(&mut self, server: &str) -> Result<Server, &'static str> {
         let server: Server = match server {
             "live" => Server::Live,
@@ -88,6 +96,7 @@ impl Bridges {
         self.general_fields.map_overlay = map_overlay;
     }
 
+    /// Serializes data structure and stores it on Bridges struct
     pub fn update_data_structure(&mut self, data_structure: impl serde::ser::Serialize) {
         let json: serde_json::Value = match serde_json::to_value(&data_structure) {
             Ok(s) => s,
@@ -99,6 +108,7 @@ impl Bridges {
         self.data_structure = json;
     }
 
+    /// Attempts to post visualization to a BRIDGES server
     pub fn visualize(&mut self) {
         use std::fmt::Write;
 
@@ -162,9 +172,21 @@ impl Bridges {
             ),
         };
     }
+
+    /// Wrapper function that calls `update_data_structure` and `visualize`
+    pub fn update_and_visualize(&mut self, data_structure: impl serde::ser::Serialize) {
+        self.update_data_structure(data_structure);
+        self.visualize();
+    }
 }
 
 // exposes struct functions for ease of access
+/// Function that exposes the constructor for Bridges struct
+/// # Example
+/// ```
+/// let mut my_bridges = bridges::new(1, "user_name", "api_key");
+///
+/// ```
 pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Bridges {
     Bridges::new_from_strings(
         assignment_number,
