@@ -203,6 +203,8 @@ mod tests {
     #[test]
     fn test_vis_post() {
         use super::*;
+        use array::Array;
+        use element::Element;
         use std::env;
 
         let user_name = match env::var("BRIDGES_USER_NAME") {
@@ -215,10 +217,10 @@ mod tests {
         };
 
         let mut my_bridges = new_from_strings(1, user_name, api_key);
-        let mut my_array = array::new::<i32>();
+        let mut my_array: Array<i32> = array::new();
         my_array.dims = vec![5, 0, 0];
         for item in 0..5 {
-            let mut my_element = element::new::<i32>();
+            let mut my_element: Element<i32> = element::new();
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
             my_element.value = item.clone();
             my_element.name = item.to_string();
