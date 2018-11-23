@@ -242,9 +242,8 @@ mod tests {
         let mut my_array: Array<i32> = array::new();
         my_array.dims = vec![5, 0, 0];
         for item in 0..5 {
-            let mut my_element: Element<i32> = element::new();
+            let mut my_element: Element<i32> = element::new(item.clone());
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
-            my_element.value = item.clone();
             my_element.name = item.to_string();
             my_array.nodes.push(my_element);
         }

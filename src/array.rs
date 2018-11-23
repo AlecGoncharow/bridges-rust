@@ -1,7 +1,7 @@
 use super::element::Element;
 
 #[derive(Serialize, Deserialize)]
-pub struct Array<T> {
+pub struct Array<T: Default> {
     visual: String,
     pub dims: Vec<i8>,
     pub nodes: Vec<Element<T>>,
