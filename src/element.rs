@@ -16,7 +16,7 @@ pub struct Element<T: Default> {
 }
 
 impl<T: Default> Element<T> {
-    pub fn new(value: T) -> Element<T> {
+    pub fn new(value: T) -> Self {
         Element {
             value,
             name: String::from(""),

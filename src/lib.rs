@@ -41,7 +41,7 @@ impl Bridges {
     /// let mut my_bridges = Bridges::new(1, "user_name", "api_key");
     ///
     /// ```
-    pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Bridges {
+    pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Self {
         Bridges::new_from_strings(
             assignment_number,
             String::from(user_name),
@@ -50,7 +50,7 @@ impl Bridges {
     }
 
     /// Same as other construct except with `String`s in place of `str`
-    pub fn new_from_strings(assignment_number: u32, user_name: String, api_key: String) -> Bridges {
+    pub fn new_from_strings(assignment_number: u32, user_name: String, api_key: String) -> Self {
         Bridges {
             assignment_number,
             user_name,
@@ -223,7 +223,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vis_post() {
+    fn test_arr_post() {
         use super::*;
         use array::Array;
         use element::Element;

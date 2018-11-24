@@ -16,7 +16,7 @@ pub struct LinkedList<T: Default> {
 }
 
 impl<T: Default> LinkedList<T> {
-    pub fn new() -> LinkedList<T> {
+    pub fn new() -> Self {
         LinkedList {
             visual: String::from("DoublyLinkedList"),
             dims: vec![0, 0, 0],

@@ -8,7 +8,7 @@ pub struct Array<T: Default> {
 }
 
 impl<T: Default> Array<T> {
-    pub fn new() -> Array<T> {
+    pub fn new() -> Self {
         Array {
             visual: String::from("Array"),
             dims: vec![0, 0, 0],
