@@ -38,11 +38,12 @@ impl Bridges {
     /// Constructor for Bridges struct
     /// # Example
     /// ```
+    /// use bridges::Bridges;
     /// let mut my_bridges = Bridges::new(1, "user_name", "api_key");
     ///
     /// ```
     pub fn new(assignment_number: u32, user_name: &str, api_key: &str) -> Self {
-        Bridges::new_from_strings(
+        Self::new_from_strings(
             assignment_number,
             String::from(user_name),
             String::from(api_key),
@@ -248,7 +249,6 @@ mod tests {
             my_array.nodes.push(my_element);
         }
         my_bridges.set_server(Server::Clone);
-        my_bridges.update_data_structure(&my_array);
-        my_bridges.visualize();
+        my_bridges.update_and_visualize(&my_array);
     }
 }
