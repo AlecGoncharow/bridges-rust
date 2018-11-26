@@ -28,20 +28,16 @@ impl<T: CloneDefault> LinkedList<T> {
     }
 
     pub fn append(&mut self, node: Element<T>) {
-        if let Some(ref mut _next) = self.head {
+        if !self.head.is_none() {
             self.nodes.push(node.clone());
             let len = self.nodes.len() as u32;
             self.links.push(link::new(len - 2, len - 1));
             self.links.push(link::new(len - 1, len - 2));
-            let mut node_clone = node.clone();
-            let mut tail_clone = self.tail.clone();
-            let new = Element::append(&mut tail_clone.unwrap(), &mut node_clone);
-            self.tail = new;
+            self.tail = Some(Rc::new(RefCell::new(node)));
         } else {
             self.nodes.push(node.clone());
-            let new = Rc::new(RefCell::new(node));
-            self.head = Some(new.clone());
-            self.tail = Some(new);
+            self.head = Some(Rc::new(RefCell::new(node.clone())));
+            self.tail = Some(Rc::new(RefCell::new(node)));
         }
     }
 }
