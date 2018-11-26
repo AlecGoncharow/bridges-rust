@@ -1,8 +1,9 @@
+use super::CloneDefault;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-#[derive(Serialize, Deserialize)]
-pub struct Element<T: Default> {
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Element<T: CloneDefault> {
     pub value: T,
     pub name: String,
     pub color: Vec<f32>,
@@ -10,12 +11,12 @@ pub struct Element<T: Default> {
     pub location: Vec<f32>,
     pub shape: String,
     #[serde(skip_serializing, skip_deserializing)]
-    next: Option<Weak<RefCell<Element<T>>>>,
+    next: Option<Rc<RefCell<Element<T>>>>,
     #[serde(skip_serializing, skip_deserializing)]
-    prev: Option<Rc<RefCell<Element<T>>>>,
+    prev: Option<Weak<RefCell<Element<T>>>>,
 }
 
-impl<T: Default> Element<T> {
+impl<T: CloneDefault> Element<T> {
     pub fn new(value: T) -> Self {
         Element {
             value,
@@ -28,8 +29,18 @@ impl<T: Default> Element<T> {
             prev: None,
         }
     }
+
+    pub fn append(
+        current: &mut Rc<RefCell<Element<T>>>,
+        new: &mut Element<T>,
+    ) -> Option<Rc<RefCell<Element<T>>>> {
+        new.prev = Some(Rc::downgrade(&current));
+        let rc = Rc::new(RefCell::new(new.clone()));
+        current.borrow_mut().next = Some(rc.clone());
+        Some(rc.clone())
+    }
 }
 
-pub fn new<T: Default>(value: T) -> Element<T> {
-    Element::<T>::new(value)
+pub fn new<T: CloneDefault>(value: T) -> Element<T> {
+    Element::new(value)
 }

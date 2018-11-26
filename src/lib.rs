@@ -7,17 +7,11 @@ extern crate serde_json;
 pub mod array;
 pub mod data_source;
 pub mod element;
+mod link;
+pub mod linked_list;
 
-#[derive(Debug)]
-pub struct Bridges {
-    pub assignment_number: u32,
-    pub user_name: String,
-    pub api_key: String,
-    server: Server,
-    general_fields: GeneralFields,
-    data_structure: serde_json::Value,
-    subassignment_index: u32,
-}
+pub trait CloneDefault: Clone + Default {}
+impl<T> CloneDefault for T where T: Clone + Default {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct GeneralFields {
@@ -32,6 +26,18 @@ pub enum Server {
     Clone,
     Local,
     None,
+}
+
+#[derive(Debug)]
+pub struct Bridges {
+    pub assignment_number: u32,
+    pub user_name: String,
+    pub api_key: String,
+    server: Server,
+    general_fields: GeneralFields,
+    data_structure: serde_json::Value,
+    subassignment_index: u32,
+    show_json: bool,
 }
 
 impl Bridges {
@@ -64,6 +70,7 @@ impl Bridges {
             },
             data_structure: serde_json::Value::default(),
             subassignment_index: 0,
+            show_json: false,
         }
     }
 
@@ -95,6 +102,10 @@ impl Bridges {
 
     pub fn set_map_overlay(&mut self, map_overlay: bool) {
         self.general_fields.map_overlay = map_overlay;
+    }
+
+    pub fn set_show_json(&mut self, show_json: bool) {
+        self.show_json = show_json;
     }
 
     /// Serializes data structure and stores it on Bridges struct
@@ -136,8 +147,6 @@ impl Bridges {
             self.user_name
         );
 
-        println!("{}", uri);
-
         let mut json: serde_json::Value = match serde_json::to_value(&self.general_fields) {
             Ok(s) => s,
             Err(error) => panic!("There was a problem serialzing Bridges fields: {}", error),
@@ -158,7 +167,9 @@ impl Bridges {
             Err(error) => panic!("There was a problem sending the request: {}", error),
         };
 
-        println!("{:?}", json);
+        if self.show_json {
+            println!("{:?}", json);
+        }
         self.subassignment_index += 1;
 
         use reqwest::StatusCode;
@@ -250,5 +261,35 @@ mod tests {
         }
         my_bridges.set_server(Server::Clone);
         my_bridges.update_and_visualize(&my_array);
+    }
+
+    #[test]
+    fn test_ll_post() {
+        use super::*;
+        use element::Element;
+        use linked_list::LinkedList;
+        use std::env;
+
+        let user_name = match env::var("BRIDGES_USER_NAME") {
+            Ok(var) => var,
+            Err(error) => panic!("There was a problem reading BRIDGES_USER_NAME: {:?}", error),
+        };
+        let api_key = match env::var("BRIDGES_API_KEY") {
+            Ok(var) => var,
+            Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
+        };
+
+        let mut my_bridges = new_from_strings(2, user_name, api_key);
+        let mut my_list: LinkedList<i32> = linked_list::new();
+
+        for item in 0..5 {
+            let mut my_element: Element<i32> = element::new(item);
+            my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
+            my_element.name = item.to_string();
+            my_list.append(my_element);
+        }
+        my_bridges.set_show_json(true);
+        my_bridges.set_server(Server::Clone);
+        my_bridges.update_and_visualize(&my_list);
     }
 }

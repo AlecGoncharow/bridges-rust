@@ -1,13 +1,14 @@
 use super::element::Element;
+use super::CloneDefault;
 
 #[derive(Serialize, Deserialize)]
-pub struct Array<T: Default> {
+pub struct Array<T: CloneDefault> {
     visual: String,
     pub dims: Vec<i8>,
     pub nodes: Vec<Element<T>>,
 }
 
-impl<T: Default> Array<T> {
+impl<T: CloneDefault> Array<T> {
     pub fn new() -> Self {
         Array {
             visual: String::from("Array"),
@@ -17,6 +18,6 @@ impl<T: Default> Array<T> {
     }
 }
 
-pub fn new<T: Default>() -> Array<T> {
+pub fn new<T: CloneDefault>() -> Array<T> {
     Array::<T>::new()
 }

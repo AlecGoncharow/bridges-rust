@@ -8,7 +8,7 @@ pub struct Link {
 }
 
 impl Link {
-    pub fn new(u32 source, u32 target) -> Self {
+    pub fn new(source: u32, target: u32) -> Self {
         Link {
             color: vec![0.0, 0.0, 0.0, 1.0],
             thickness: 1,
@@ -19,6 +19,6 @@ impl Link {
     }
 }
 
-pub fn new(u32 source, u32 target) -> Link {
-    Link::new(source, target);
+pub fn new(source: u32, target: u32) -> Link {
+    Link::new(source, target)
 }
