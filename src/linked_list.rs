@@ -34,7 +34,7 @@ impl Default for ListType {
 impl<T: CloneDefault> LinkedList<T> {
     pub fn new() -> Self {
         LinkedList {
-            visual: String::from("DoublyLinkedList"),
+            visual: String::from("SinglyLinkedList"),
             nodes: vec![],
             links: vec![],
             head: None,
@@ -78,6 +78,12 @@ impl<T: CloneDefault> LinkedList<T> {
     }
 
     pub fn set_list_type(&mut self, list_type: ListType) {
+        self.visual = match list_type {
+            ListType::Single => String::from("SinglyLinkedList"),
+            ListType::Double => String::from("DoublyLinkedList"),
+            ListType::CircleSingle => String::from("CircularDoublyLinkedList"),
+            ListType::CircleDouble => String::from("CircularDoublyLinkedList"),
+        };
         self.list_type = list_type;
     }
 }

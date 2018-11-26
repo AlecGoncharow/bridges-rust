@@ -266,8 +266,6 @@ mod tests {
     #[test]
     fn test_ll_post() {
         use super::*;
-        use element::Element;
-        use linked_list::LinkedList;
         use linked_list::ListType;
         use std::env;
 
