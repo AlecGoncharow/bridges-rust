@@ -250,7 +250,7 @@ mod tests {
             Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
         };
 
-        let mut my_bridges = new_from_strings(1, user_name, api_key);
+        let mut my_arr_bridges = new_from_strings(1, user_name, api_key);
         let mut my_array: Array<i32> = array::new();
         my_array.dims = vec![5, 0, 0];
         for item in 0..5 {
@@ -259,8 +259,9 @@ mod tests {
             my_element.name = item.to_string();
             my_array.nodes.push(my_element);
         }
-        my_bridges.set_server(Server::Clone);
-        my_bridges.update_and_visualize(&my_array);
+        my_arr_bridges.set_show_json(true);
+        my_arr_bridges.set_server(Server::Clone);
+        my_arr_bridges.update_and_visualize(&my_array);
     }
 
     #[test]
