@@ -10,8 +10,8 @@ pub mod element;
 mod link;
 pub mod linked_list;
 
-pub trait CloneDefault: Clone + Default {}
-impl<T> CloneDefault for T where T: Clone + Default {}
+pub trait CloneDefault: Clone + Default + Eq {}
+impl<T> CloneDefault for T where T: Clone + Default + Eq {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct GeneralFields {
@@ -303,6 +303,11 @@ mod tests {
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
             my_element.name = item.to_string();
             my_list.append(my_element);
+            let mut my_link = match my_list.get_link(item - 1, item) {
+                Some(l) => l,
+                None => continue,
+            };
+            my_link.color = vec![0.0, 63.75 * item as f32, 0.0, 1.0];
         }
 
         my_bridges.update_and_visualize(&my_list);

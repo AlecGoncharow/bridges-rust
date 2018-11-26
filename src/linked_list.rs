@@ -43,6 +43,19 @@ impl<T: CloneDefault> LinkedList<T> {
         }
     }
 
+    /// Takes in an Element<T> and appends it to the list according to the type of list
+    /// # Example
+    /// ```
+    /// use bridges::linked_list::{LinkedList, ListType};
+    /// use bridges::element::Element;
+    ///
+    /// let mut my_list: LinkedList<i32> = LinkedList::new();
+    /// my_list.set_list_type(ListType::Double);
+    /// let mut my_element = Element::new(0);
+    /// // Style options here
+    /// my_list.append(my_element);
+    ///
+    /// ```
     pub fn append(&mut self, node: Element<T>) {
         if !self.head.is_none() {
             self.nodes.push(node.clone());
@@ -85,6 +98,28 @@ impl<T: CloneDefault> LinkedList<T> {
             ListType::CircleDouble => String::from("CircularDoublyLinkedList"),
         };
         self.list_type = list_type;
+    }
+
+    /// Returns the link created from appending elements to the list
+    /// # Example
+    /// ```
+    /// use bridges::linked_list::LinkedList;
+    /// let mut my_list: LinkedList<i32> = LinkedList::new();
+    /// let my_link = my_list.get_link(1, 2);
+    /// ```
+    pub fn get_link(&mut self, source: T, target: T) -> Option<&mut Link> {
+        let s = match self.nodes.iter().position(|ref e| e.value == source) {
+            Some(e) => e as u32,
+            None => return None,
+        };
+        let t = match self.nodes.iter().position(|ref e| e.value == target) {
+            Some(e) => e as u32,
+            None => return None,
+        };
+
+        self.links
+            .iter_mut()
+            .find(|ref mut l| l.source == s && l.target == t)
     }
 }
 
