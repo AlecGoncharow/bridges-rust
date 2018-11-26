@@ -268,6 +268,7 @@ mod tests {
         use super::*;
         use element::Element;
         use linked_list::LinkedList;
+        use linked_list::ListType;
         use std::env;
 
         let user_name = match env::var("BRIDGES_USER_NAME") {
@@ -280,16 +281,31 @@ mod tests {
         };
 
         let mut my_bridges = new_from_strings(2, user_name, api_key);
-        let mut my_list: LinkedList<i32> = linked_list::new();
+        my_bridges.set_show_json(true);
+        my_bridges.set_server(Server::Clone);
+        build_list_and_vis(&mut my_bridges, ListType::Single);
+        build_list_and_vis(&mut my_bridges, ListType::Double);
+        build_list_and_vis(&mut my_bridges, ListType::CircleSingle);
+        build_list_and_vis(&mut my_bridges, ListType::CircleDouble);
+    }
 
+    pub fn build_list_and_vis(
+        my_bridges: &mut super::Bridges,
+        list_type: super::linked_list::ListType,
+    ) {
+        use super::*;
+        use element::Element;
+        use linked_list::LinkedList;
+
+        let mut my_list: LinkedList<i32> = linked_list::new();
+        my_list.set_list_type(list_type);
         for item in 0..5 {
             let mut my_element: Element<i32> = element::new(item);
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
             my_element.name = item.to_string();
             my_list.append(my_element);
         }
-        my_bridges.set_show_json(true);
-        my_bridges.set_server(Server::Clone);
+
         my_bridges.update_and_visualize(&my_list);
     }
 }
