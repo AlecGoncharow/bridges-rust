@@ -122,8 +122,6 @@ impl Bridges {
 
     /// Attempts to post visualization to a BRIDGES server
     pub fn visualize(&mut self) {
-        use std::fmt::Write;
-
         let url = match self.server {
             Server::Live => "http://bridges-cs.herokuapp.com",
             Server::Clone => "http://bridges-clone.herokuapp.com",
@@ -137,9 +135,9 @@ impl Bridges {
             _ => "",
         };
 
-        write!(
-            &mut uri,
-            "/assignments/{}.{}{}?apikey={}&username={}",
+        uri = format!(
+            "{}/assignments/{}.{}{}?apikey={}&username={}",
+            uri,
             self.assignment_number,
             subassignment_index_leading_zero,
             self.subassignment_index,
@@ -147,6 +145,9 @@ impl Bridges {
             self.user_name
         );
 
+        if self.show_json {
+            println!("{}", uri);
+        }
         let mut json: serde_json::Value = match serde_json::to_value(&self.general_fields) {
             Ok(s) => s,
             Err(error) => panic!("There was a problem serialzing Bridges fields: {}", error),
@@ -251,8 +252,9 @@ mod tests {
         };
 
         let mut my_arr_bridges = new_from_strings(1, user_name, api_key);
+        my_arr_bridges.set_title(String::from("Array test assignment"));
         let mut my_array: Array<i32> = array::new();
-        my_array.dims = vec![5, 0, 0];
+        my_array.dims = vec![5, 1, 1];
         for item in 0..5 {
             let mut my_element: Element<i32> = element::new(item.clone());
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
@@ -262,6 +264,18 @@ mod tests {
         my_arr_bridges.set_show_json(true);
         my_arr_bridges.set_server(Server::Clone);
         my_arr_bridges.update_and_visualize(&my_array);
+
+        let mut my_array: Array<i32> = array::new();
+        my_array.dims = vec![5, 5, 1];
+        for dim in 0..5 {
+            for item in 0..5 {
+                let mut my_element: Element<i32> = element::new(item * (dim + 1));
+                my_element.color = vec![0.0, 63.75 * item as f32, 63.75 * dim as f32, 1.0];
+                my_element.name = format!("[{}, {}]", dim, item);
+                my_array.nodes.push(my_element);
+            }
+        }
+        my_arr_bridges.update_and_visualize(&my_array);
     }
 
     #[test]
@@ -270,17 +284,18 @@ mod tests {
         use linked_list::ListType;
         use std::env;
 
-        let user_name = match env::var("BRIDGES_USER_NAME") {
+        let user_name = match env::var("RUST_BRIDGES_USER_NAME") {
             Ok(var) => var,
             Err(error) => panic!("There was a problem reading BRIDGES_USER_NAME: {:?}", error),
         };
-        let api_key = match env::var("BRIDGES_API_KEY") {
+        let api_key = match env::var("RUST_BRIDGES_API_KEY") {
             Ok(var) => var,
             Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
         };
 
         let mut my_bridges = new_from_strings(2, user_name, api_key);
         my_bridges.set_show_json(true);
+        my_bridges.set_title(String::from("Linked List test assignment"));
         my_bridges.set_server(Server::Clone);
         build_list_and_vis(&mut my_bridges, ListType::Single);
         build_list_and_vis(&mut my_bridges, ListType::Double);
@@ -303,11 +318,18 @@ mod tests {
             my_element.color = vec![63.75 * item as f32, 0.0, 0.0, 1.0];
             my_element.name = item.to_string();
             my_list.append(my_element);
-            let mut my_link = match my_list.get_link(item - 1, item) {
+            {
+                let mut my_link = match my_list.get_link(item - 1, item) {
+                    Some(l) => l,
+                    None => continue,
+                };
+                my_link.color = vec![0.0, 63.75 * item as f32, 0.0, 1.0];
+            }
+            let mut my_link = match my_list.get_link(item, item - 1) {
                 Some(l) => l,
                 None => continue,
             };
-            my_link.color = vec![0.0, 63.75 * item as f32, 0.0, 1.0];
+            my_link.color = vec![0.0, 0.0, 63.75 * item as f32, 1.0];
         }
 
         my_bridges.update_and_visualize(&my_list);
