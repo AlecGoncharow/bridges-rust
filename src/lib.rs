@@ -284,11 +284,11 @@ mod tests {
         use linked_list::ListType;
         use std::env;
 
-        let user_name = match env::var("RUST_BRIDGES_USER_NAME") {
+        let user_name = match env::var("BRIDGES_USER_NAME") {
             Ok(var) => var,
             Err(error) => panic!("There was a problem reading BRIDGES_USER_NAME: {:?}", error),
         };
-        let api_key = match env::var("RUST_BRIDGES_API_KEY") {
+        let api_key = match env::var("BRIDGES_API_KEY") {
             Ok(var) => var,
             Err(error) => panic!("There was a problem reading BRIDGES_API_KEY: {:?}", error),
         };
